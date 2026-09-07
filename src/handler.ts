@@ -45,7 +45,13 @@ export const handler = async (
   // --- Authenticate ---
   const providedKey = event.headers?.["x-api-key"];
   if (!providedKey || providedKey !== config.apiKey) {
-    log("warn", { requestId, msg: "unauthorized request", latencyMs: Date.now() - startMs });
+    log("warn", {
+    requestId,
+    msg: "unauthorized request",
+    providedKeyPreview: providedKey ? `${providedKey.slice(0, 4)}...${providedKey.slice(-4)}` : "(missing)",
+    providedKeyLength: providedKey?.length ?? 0,
+    latencyMs: Date.now() - startMs,
+  });
     return {
       statusCode: 401,
       headers: JSON_HEADERS,
