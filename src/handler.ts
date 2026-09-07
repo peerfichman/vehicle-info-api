@@ -20,9 +20,18 @@ export const handler = async (
   const requestId = event.requestContext?.requestId ?? "-";
   const startMs = Date.now();
 
+  // Redact the API key value so it never appears in logs.
+  const logHeaders = Object.fromEntries(
+    Object.entries(event.headers ?? {}).map(([k, v]) =>
+      [k, k === "x-api-key" ? "[redacted]" : v]
+    )
+  );
+
   log("info", {
     requestId,
     route: event.requestContext?.http?.method + " " + event.requestContext?.http?.path,
+    sourceIp: event.requestContext?.http?.sourceIp,
+    headers: logHeaders,
     msg: "request received",
   });
 
