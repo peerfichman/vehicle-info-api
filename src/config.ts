@@ -37,4 +37,6 @@ export const config = {
   ),
 
   logLevel: requireEnv("LOG_LEVEL", "info"),
+
+  apiKey: requireEnv("API_KEY"),
 } as const;

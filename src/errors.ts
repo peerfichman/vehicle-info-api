@@ -1,10 +1,12 @@
 export type ErrorCode =
+  | "UNAUTHORIZED"
   | "VALIDATION_ERROR"
   | "NOT_FOUND"
   | "BAD_GATEWAY"
   | "INTERNAL_ERROR";
 
 const HTTP_STATUS: Record<ErrorCode, number> = {
+  UNAUTHORIZED: 401,
   VALIDATION_ERROR: 400,
   NOT_FOUND: 404,
   BAD_GATEWAY: 502,

@@ -50,6 +50,15 @@ resource "aws_cloudwatch_log_group" "lambda" {
 }
 
 # ---------------------------------------------------------------------------
+# API Key — generated once by Terraform, injected into Lambda as env var
+# ---------------------------------------------------------------------------
+
+resource "random_password" "api_key" {
+  length  = 32
+  special = false
+}
+
+# ---------------------------------------------------------------------------
 # Lambda Layer — third-party runtime deps (zod only)
 # AWS SDK v3 is provided by the Lambda runtime and must NOT be in the layer.
 # ---------------------------------------------------------------------------
@@ -83,6 +92,7 @@ resource "aws_lambda_function" "vehicle_info" {
       UPSTREAM_TIMEOUT_MS  = tostring(var.upstream_timeout_ms)
       UPSTREAM_MAX_RETRIES = tostring(var.max_retries)
       LOG_LEVEL            = "info"
+      API_KEY              = random_password.api_key.result
     }
   }
 

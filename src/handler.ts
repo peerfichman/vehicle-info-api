@@ -1,4 +1,5 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
+import { config } from "./config.js";
 import { AppError, toHttpResponse } from "./errors.js";
 import { VehicleRequestSchema } from "./schema.js";
 import { lookupVehicle } from "./vehicle-service.js";
@@ -24,6 +25,20 @@ export const handler = async (
     route: event.requestContext?.http?.method + " " + event.requestContext?.http?.path,
     msg: "request received",
   });
+
+  // --- Authenticate ---
+  const providedKey = event.headers?.["x-api-key"];
+  if (!providedKey || providedKey !== config.apiKey) {
+    log("warn", { requestId, msg: "unauthorized request" });
+    return {
+      statusCode: 401,
+      headers: JSON_HEADERS,
+      body: JSON.stringify({
+        success: false,
+        error: { code: "UNAUTHORIZED", message: "Invalid or missing API key" },
+      }),
+    };
+  }
 
   try {
     // --- Parse request body ---

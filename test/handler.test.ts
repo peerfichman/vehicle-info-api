@@ -9,6 +9,7 @@ vi.mock("../src/config.js", () => ({
     upstreamTimeoutMs: 3000,
     upstreamMaxRetries: 2,
     logLevel: "error",
+    apiKey: "test-api-key",
   },
 }));
 
@@ -30,13 +31,13 @@ const VALID_DATA = {
 };
 
 /** Minimal APIGW HTTP API v2 proxy event. */
-function makeEvent(body: unknown): APIGatewayProxyEventV2 {
+function makeEvent(body: unknown, headers: Record<string, string> = {}): APIGatewayProxyEventV2 {
   return {
     version: "2.0",
     routeKey: "POST /vehicle-info",
     rawPath: "/vehicle-info",
     rawQueryString: "",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", "x-api-key": "test-api-key", ...headers },
     requestContext: {
       accountId: "123456789012",
       apiId: "test",
@@ -156,6 +157,38 @@ describe("handler", () => {
       expect(body.error.code).toBe("INTERNAL_ERROR");
       // Never expose internal error details
       expect(body.error.message).not.toContain("blew up");
+    });
+  });
+
+  describe("authentication → 401", () => {
+    it("returns 401 when x-api-key header is missing", async () => {
+      const result = await handler(makeEvent({ license_plate: "12345678" }, { "x-api-key": "" }));
+      expect(result).toMatchObject({ statusCode: 401 });
+      const body = JSON.parse((result as { body: string }).body);
+      expect(body.success).toBe(false);
+      expect(body.error.code).toBe("UNAUTHORIZED");
+    });
+
+    it("returns 401 when x-api-key header is omitted entirely", async () => {
+      const event = makeEvent({ license_plate: "12345678" });
+      // Remove the default key header
+      delete (event.headers as Record<string, string>)["x-api-key"];
+      const result = await handler(event);
+      expect(result).toMatchObject({ statusCode: 401 });
+      const body = JSON.parse((result as { body: string }).body);
+      expect(body.error.code).toBe("UNAUTHORIZED");
+    });
+
+    it("returns 401 when x-api-key value is wrong", async () => {
+      const result = await handler(makeEvent({ license_plate: "12345678" }, { "x-api-key": "wrong-key" }));
+      expect(result).toMatchObject({ statusCode: 401 });
+      const body = JSON.parse((result as { body: string }).body);
+      expect(body.error.code).toBe("UNAUTHORIZED");
+    });
+
+    it("does not call lookupVehicle when auth fails", async () => {
+      await handler(makeEvent({ license_plate: "12345678" }, { "x-api-key": "bad" }));
+      expect(mockLookup).not.toHaveBeenCalled();
     });
   });
 
