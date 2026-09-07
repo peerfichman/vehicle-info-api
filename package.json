@@ -1,0 +1,27 @@
+{
+  "name": "vehicle-info-api",
+  "version": "1.0.0",
+  "description": "Thin Lambda wrapper around upstream vehicle-info endpoint",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "package": "bash scripts/package.sh",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:live": "RUN_LIVE=1 vitest run test/live-smoke.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "zod": "^3.23.0"
+  }
+}

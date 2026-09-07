@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Test coverage
+coverage/
+
+# Lambda packaging
+artifacts/
+*.zip
+
+# Layer build dir
+layer/
+
+# TypeScript incremental
+*.tsbuildinfo
+
+# Terraform state & local config
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfstate.d/
+*.tfvars
+!example.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# OS / editor
+.DS_Store
+.env
+*.log
+.vscode/
+.idea/
