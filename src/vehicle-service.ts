@@ -2,7 +2,6 @@ import { config } from "./config.js";
 import { AppError } from "./errors.js";
 import {
   UpstreamSuccessSchema,
-  UpstreamNotFoundSchema,
   type VehicleData,
 } from "./schema.js";
 
