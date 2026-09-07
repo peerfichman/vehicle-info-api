@@ -37,7 +37,7 @@ function makeEvent(body: unknown, headers: Record<string, string> = {}): APIGate
     routeKey: "POST /vehicle-info",
     rawPath: "/vehicle-info",
     rawQueryString: "",
-    headers: { "content-type": "application/json", "x-api-key": "test-api-key", ...headers },
+    headers: { "content-type": "application/json", "x-api-key": "Api-Key test-api-key", ...headers },
     requestContext: {
       accountId: "123456789012",
       apiId: "test",
@@ -161,17 +161,8 @@ describe("handler", () => {
   });
 
   describe("authentication → 401", () => {
-    it("returns 401 when x-api-key header is missing", async () => {
-      const result = await handler(makeEvent({ license_plate: "12345678" }, { "x-api-key": "" }));
-      expect(result).toMatchObject({ statusCode: 401 });
-      const body = JSON.parse((result as { body: string }).body);
-      expect(body.success).toBe(false);
-      expect(body.error.code).toBe("UNAUTHORIZED");
-    });
-
-    it("returns 401 when x-api-key header is omitted entirely", async () => {
+    it("returns 401 when x-api-key header is missing entirely", async () => {
       const event = makeEvent({ license_plate: "12345678" });
-      // Remove the default key header
       delete (event.headers as Record<string, string>)["x-api-key"];
       const result = await handler(event);
       expect(result).toMatchObject({ statusCode: 401 });
@@ -179,15 +170,22 @@ describe("handler", () => {
       expect(body.error.code).toBe("UNAUTHORIZED");
     });
 
-    it("returns 401 when x-api-key value is wrong", async () => {
-      const result = await handler(makeEvent({ license_plate: "12345678" }, { "x-api-key": "wrong-key" }));
+    it("returns 401 when prefix is missing (bare key, no Api-Key prefix)", async () => {
+      const result = await handler(makeEvent({ license_plate: "12345678" }, { "x-api-key": "test-api-key" }));
+      expect(result).toMatchObject({ statusCode: 401 });
+      const body = JSON.parse((result as { body: string }).body);
+      expect(body.error.code).toBe("UNAUTHORIZED");
+    });
+
+    it("returns 401 when key value is wrong", async () => {
+      const result = await handler(makeEvent({ license_plate: "12345678" }, { "x-api-key": "Api-Key wrong-key" }));
       expect(result).toMatchObject({ statusCode: 401 });
       const body = JSON.parse((result as { body: string }).body);
       expect(body.error.code).toBe("UNAUTHORIZED");
     });
 
     it("does not call lookupVehicle when auth fails", async () => {
-      await handler(makeEvent({ license_plate: "12345678" }, { "x-api-key": "bad" }));
+      await handler(makeEvent({ license_plate: "12345678" }, { "x-api-key": "Api-Key wrong-key" }));
       expect(mockLookup).not.toHaveBeenCalled();
     });
   });
