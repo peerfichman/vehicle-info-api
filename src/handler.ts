@@ -28,7 +28,7 @@ export const handler = async (
   // Redact the API key value so it never appears in logs.
   const logHeaders = Object.fromEntries(
     Object.entries(event.headers ?? {}).map(([k, v]) =>
-      [k, k === "x-api-key" ? "[redacted]" : v]
+      [k, k === "x-api-key" ? `...${v?.slice(-4) ?? ""}` : v]
     )
   );
 
