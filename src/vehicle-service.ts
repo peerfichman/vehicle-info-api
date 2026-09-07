@@ -111,13 +111,12 @@ export async function lookupVehicle(
           upstreamStatus,
           latencyMs,
           plate,
+          attempt,          // >0 means this succeeded after retries
         });
         return parsed.data.data;
       }
 
       if (response.status === 404) {
-        const parsed = UpstreamNotFoundSchema.safeParse(body);
-        const upstreamMsg = parsed.success ? parsed.data.detail.error : "Vehicle not found";
         log("info", {
           requestId,
           msg: "vehicle not found",

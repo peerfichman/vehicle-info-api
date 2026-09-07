@@ -40,3 +40,16 @@ export const config = {
 
   apiKey: requireEnv("API_KEY"),
 } as const;
+
+// Log non-sensitive config at cold-start so a deploy can be verified immediately.
+console.info(
+  JSON.stringify({
+    level: "info",
+    msg: "config loaded",
+    upstreamBaseUrl: config.upstreamBaseUrl,
+    upstreamTimeoutMs: config.upstreamTimeoutMs,
+    upstreamMaxRetries: config.upstreamMaxRetries,
+    logLevel: config.logLevel,
+    // apiKey intentionally omitted
+  })
+);
