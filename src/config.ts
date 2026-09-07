@@ -50,6 +50,6 @@ console.info(
     upstreamTimeoutMs: config.upstreamTimeoutMs,
     upstreamMaxRetries: config.upstreamMaxRetries,
     logLevel: config.logLevel,
-    // apiKey intentionally omitted
+    apiKeySuffix: `...${config.apiKey.slice(-4)}`,
   })
 );
